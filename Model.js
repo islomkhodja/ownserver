@@ -11,13 +11,14 @@ const knex = require('knex')({
 const forInsert = require('./data.json')
 
 class Model {
-	constructor(name) {
+	constructor(name, knex) {
 		this.name = name;
+		this.knex = knex;
 	}
 
 	async create(obj) {
 		console.log("ishladimi")
-		return knex.schema.withSchema('public').createTable(this.name, function (table) {
+		return this.knex.schema.withSchema('public').createTable(this.name, function (table) {
 			Object.keys(obj).forEach(key => {
 				console.log("ishladimi")
 				  switch(obj[key]) {
@@ -43,7 +44,7 @@ class Model {
 				  		table.time(key);
 				  		break;
 				  	case "timestamp":
-				  		table.timestamp(key).defaultTo(knex.fn.now());
+				  		table.timestamp(key).defaultTo(this.knex.fn.now());
 				  		break;
 				  	case "biginteger": 
 				  		table.bigInteger(key);
@@ -60,30 +61,30 @@ class Model {
 	}
 
 	async insert(data, returning = "id") {
-		return knex.insert(data, returning).into(this.name);
+		return this.knex.insert(data, returning).into(this.name);
 	}
 
 	async update(id, data) {
-		return knex(this.name).update(data, "id").where('id', id);
+		return this.knex(this.name).update(data, "id").where('id', id);
 	}
 
 	async delete(id) {
-		return knex(this.name).where("id", id);
+		return this.knex(this.name).where("id", id).del();
 	}
 
 	async getById(id) {
-		return knex(this.name).where("id", id).select();
+		return this.knex(this.name).where("id", id).select();
 	}
 
 	async getList() {
-		return knex.select().from(this.name);
+		return this.knex.select().from(this.name);
 	}
 
 }
 
 class Person extends Model {
 	async getByCountry(country) {
-		return knex(this.name).where("country", country).select();
+		return this.knex(this.name).where("country", country).select();
 	}
 
 	async getByMinAge() {
@@ -92,33 +93,38 @@ class Person extends Model {
 }
 
 
-const person = new Person("person");
+const person = new Person("person", knex);
 
-person.create({ 
-  id: "serial",
-  name: "string",
-  date_of_birth: "date",
-  address: "string",
-  country: "string",
-  email: "string"
-}).then(data => {
-	console.log("create", data);
+// person.create({ 
+//   id: "serial",
+//   name: "string",
+//   date_of_birth: "date",
+//   address: "string",
+//   country: "string",
+//   email: "string"
+// }).then()
 
-	return person.insert(forInsert)
-}).then(data => {
-	console.log("insert",data);
-	return person.update(1, {"date_of_birth": "1999-02-26"})
-}).then(data => {
-	console.log("update",data);
-	return person.delete(3);
-}).then(data => {
-	console.log("delete",data);
-	return person.getByCountry("Great Britain");
-}).then(data => {
-	console.log("getByCountry", data);
-})
+module.exports = person;
 
-.catch(err => console.log(err))
+
+// .then(data => {
+// 	console.log("create", data);
+
+// 	return person.insert(forInsert)
+// }).then(data => {
+// 	console.log("insert",data);
+// 	return person.update(1, {"date_of_birth": "1999-02-26"})
+// }).then(data => {
+// 	console.log("update",data);
+// 	return person.delete(3);
+// }).then(data => {
+// 	console.log("delete",data);
+// 	return person.getByCountry("Great Britain");
+// }).then(data => {
+// 	console.log("getByCountry", data);
+// })
+
+// .catch(err => console.log(err))
 
 
 // person.getList(); // ==> []

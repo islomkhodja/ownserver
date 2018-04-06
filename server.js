@@ -1,10 +1,11 @@
-var finalhandler = require('finalhandler')
-var http         = require('http')
-
+const finalhandler = require('finalhandler')
+const http         = require('http')
 
 const Server = require('./ServerClass');
 const server = new Server();
-// console.log(server);
+
+const controller = require('./person.controller');
+
 
 server.setMiddleWare((req, res, err) => {
     console.log("this is middle ware");
@@ -22,35 +23,22 @@ server.setRoute('/', {
 
 server.setRoute("/person",{
     method: "GET",
-    handler: (req, res, next) => {
-        console.log("route ichidagi ");
-        res.end('This is person');
-
-    },
+    handler: controller.getAll,
 }, {
     method: "POST",
-    handler: (req, res) => {
-        res.end('hohohoho');
-    }
+    handler: controller.create
 });
 
-server.setRoute("/person/list/:1", {
+server.setRoute("/person/:1", {
     method:"GET",
-    handler: (args, req, res) => {
-        console.log(args);
-        res.end('')
-    }
+    handler: controller.getById
+}, {
+    method: "PUT",
+    handler: controller.updateById
+}, {
+    method: "DELETE",
+    handler: controller.deleteById
 });
-
-server.setRoute("/person/list/:1/:2", {
-    method:"GET",
-    handler: (args, req, res) => {
-        console.log(args);
-        res.end('test')
-    }
-});
-
-
 
 http.createServer(function(req, res) {
     server(req, res, finalhandler(req, res))

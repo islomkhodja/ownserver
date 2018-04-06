@@ -1,16 +1,16 @@
 const slice = Array.prototype.slice;
+const pathToRegexp = require('path-to-regexp');
 
 class Server {
 	constructor() {
 		function app(req, res, next) {
 			app.handle(req, res, next);
 		}
+		
+		Object.setPrototypeOf(app, this);
 
-		app.middlewares = this.middlewares = [];
-		app.routes = this.routes = {};
-		app.setMiddleWare = this.setMiddleWare;
-		app.setRoute = this.setRoute;
-		app.handle = this.handle;
+		app.middlewares = [];
+		app.routes = {};
 
 		return app; 
 	}
@@ -31,32 +31,63 @@ class Server {
 			let handler = routingSettings[i].handler;
 			this.routes[path][method] = handler;
 		}
-				
+
 		return this;
 	}
 
 	handle(req, res, done) {
-		req =  
+		// first midlleware
+
+		// this.middlewares.forEach(mdw => {
+		// 	mdw(req, res, done);
+		// })
+
+		// after route
+		let pathUrl = req.url;
+		let method = req.method;
+		let routes = this.routes;
+
+		let filteredRoute = Object.keys(routes).filter((path) => {
+			let temp = pathToRegexp(path, [], {
+			    sensitive: true,
+			    strict: false,
+			    end: true
+			  }) 
+			return temp.exec(pathUrl) !== null;
+		});
+
+		console.log("r",filteredRoute);
+
+		if(!filteredRoute[0]) {
+			console.log("sdfsdfsd")
+			return done(new Error('not found'));
+		}
+
+		let args = pathToRegexp(filteredRoute[0], [], {
+			    sensitive: true,
+			    strict: false,
+			    end: true
+			  }).exec(pathUrl);
 
 
-		let layer = this.routes[req.url];
+		let layer = routes[filteredRoute[0]];
+		console.log('layer', layer);
+		
 		if(!layer) {
 			return done("Not found");
 		}
 
-		layer[req.method](req, res, done);
+		if(args.length === 1) {
+			layer[method]( req, res, done );
+		} else {
+
+			layer[method]( args, req, res, done );
+		}
 	}
 
 	listen() {
-
-	}
-
-	_decoratorForRequest(req) {
-		req.send = 
-	}
-
-	_decoratorForResponse() {
-
+		let server = http.createServer(this);
+  		return server.listen.apply(server, arguments);
 	}
 }
 

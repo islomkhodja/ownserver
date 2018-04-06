@@ -56,7 +56,7 @@ class Server {
 			return temp.exec(pathUrl) !== null;
 		});
 
-		console.log("r",filteredRoute);
+		// console.log("r",filteredRoute);
 
 		if(!filteredRoute[0]) {
 			console.log("sdfsdfsd")

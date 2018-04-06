@@ -8,8 +8,6 @@ const server = new Server();
 
 server.setMiddleWare((req, res, err) => {
     console.log("this is middle ware");
-    // err(new Error("test"))
-    // res.end("test");
 }).setMiddleWare((req, res, err) => {
     console.log("this is seconds middleware");
 })

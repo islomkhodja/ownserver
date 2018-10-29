@@ -8,24 +8,17 @@ const finalhandler = require('finalhandler');
 const Server = require('../');
 const server = new Server();
 
-server.setRoute('/', {
-  method: "GET",
-  handler: (req, res) => {
+server.get('/', (req, res) => {
     res.end('This is main page')
-  },
-})
+  })
 
-server.setRoute('/:1/:2', {
-  method: "GET",
-  handler: (args, req, res, err) => {
+server.get('/:1/:2', (args, req, res, err) => {
     res.end('This is main page', args[1], args[2]);
-  }
-}, {
-  method: "POST",
-  handler: (args, req, res, err) => {
-    res.end("this is sparta!!");  
-  }
-});
+  });
+
+server.post('/:1/:2', (args, req, res, err) => {
+    res.end("this is sparta!!");
+  });
 
 http.createServer(function(req, res) {
   server(req, res, finalhandler(req, res))

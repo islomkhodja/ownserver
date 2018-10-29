@@ -6,18 +6,36 @@ class Server {
     function app(req, res, next) {
       app.handle(req, res, next);
     }
-    
+
     Object.setPrototypeOf(app, this);
 
     app.middlewares = [];
     app.routes = {};
 
-    return app; 
+    return app;
   }
-  
+
   setMiddleWare(fn) {
     this.middlewares.push(fn);
     return this;
+  }
+
+  use(fn) {
+    this.setMiddleWare(fn);
+  }
+
+  get(path, handler) {
+    this.setRoute(path, {
+      method: "GET",
+      handler: handler
+    })
+  }
+
+  post(path, handler) {
+    this.setRoute(path, {
+      method: "POST",
+      handler: handler
+    })
   }
 
   setRoute(path) {
@@ -26,7 +44,7 @@ class Server {
     // var a = {};
 
     this.routes[path] = {};
-    for(let i = 1; i < routingSettings.length; i++) {
+    for (let i = 1; i < routingSettings.length; i++) {
       let method = routingSettings[i].method;
       let handler = routingSettings[i].handler;
       this.routes[path][method] = handler;
@@ -49,44 +67,44 @@ class Server {
 
     let filteredRoute = Object.keys(routes).filter((path) => {
       let temp = pathToRegexp(path, [], {
-          sensitive: true,
-          strict: false,
-          end: true
-        }) 
+        sensitive: true,
+        strict: false,
+        end: true
+      })
       return temp.exec(pathUrl) !== null;
     });
 
 
-    if(!filteredRoute[0]) {
+    if (!filteredRoute[0]) {
       // console.log("sdfsdfsd")
       return done(new Error('not found'));
     }
 
     let args = pathToRegexp(filteredRoute[0], [], {
-          sensitive: true,
-          strict: false,
-          end: true
-        }).exec(pathUrl);
+      sensitive: true,
+      strict: false,
+      end: true
+    }).exec(pathUrl);
 
 
     let layer = routes[filteredRoute[0]];
     console.log('layer', layer);
-    
-    if(!layer) {
+
+    if (!layer) {
       return done("Not found");
     }
 
-    if(args.length === 1) {
-      layer[method]( req, res, done );
+    if (args.length === 1) {
+      layer[method](req, res, done);
     } else {
 
-      layer[method]( args, req, res, done );
+      layer[method](args, req, res, done);
     }
   }
 
   listen() {
     let server = http.createServer(this);
-      return server.listen.apply(server, arguments);
+    return server.listen.apply(server, arguments);
   }
 }
 

@@ -22,9 +22,6 @@ class Server {
 
   setRoute(path) {
     let routingSettings = slice.call(arguments);
-    // console.log(routingSettings);
-    // var a = {};
-
     this.routes[path] = {};
     for(let i = 1; i < routingSettings.length; i++) {
       let method = routingSettings[i].method;
@@ -36,13 +33,6 @@ class Server {
   }
 
   handle(req, res, done) {
-    // first midlleware
-
-    // this.middlewares.forEach(mdw => {
-    //  mdw(req, res, done);
-    // })
-
-    // after route
     let pathUrl = req.url;
     let method = req.method;
     let routes = this.routes;
@@ -58,7 +48,6 @@ class Server {
 
 
     if(!filteredRoute[0]) {
-      // console.log("sdfsdfsd")
       return done(new Error('not found'));
     }
 
@@ -79,7 +68,6 @@ class Server {
     if(args.length === 1) {
       layer[method]( req, res, done );
     } else {
-
       layer[method]( args, req, res, done );
     }
   }

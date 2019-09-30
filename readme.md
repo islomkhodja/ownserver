@@ -1,6 +1,5 @@
 # ownserver
 
-Unicon Study 2018 da berilgan uy vazifaga qilingan micro framework.
 
 ```javascript
 const http = require('http');
